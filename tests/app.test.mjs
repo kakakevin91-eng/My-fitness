@@ -10,14 +10,17 @@ import {
   restoreTimerState,
   summarizeLogs
 } from '../app.js';
-import {activePlanIds, exerciseLibrary} from '../gym-plans.js';
+import {activePlanIds, exerciseLibrary, shoulderDetails} from '../gym-plans.js';
 
 test('保留原本圓肩計劃及總組數', () => {
+  assert.ok(activePlanIds.includes('shoulder'));
+  assert.equal(activePlanIds.length, 11);
   assert.deepEqual(plans.shoulder.ex.map(item => item[1]), [
     '胸肌伸展', '貓式伸展', '俯臥 Y–T–I', '反向蝴蝶機飛鳥',
     'Cable Face Pull', '啞鈴回環', '坐姿啞鈴推肩'
   ]);
   assert.equal(plans.shoulder.ex.reduce((sum, item) => sum + item[3], 0), 18);
+  for (const exercise of plans.shoulder.ex) assert.ok(shoulderDetails[exercise[0]]?.[0] && shoulderDetails[exercise[0]]?.[1]);
 });
 
 test('提供 20 個各自不同的入門計劃', () => {
@@ -31,8 +34,8 @@ test('提供 20 個各自不同的入門計劃', () => {
 });
 
 test('日常選單有十套健身室計劃及中英文部位與替代動作', () => {
-  assert.equal(activePlanIds.length, 10);
-  for (const id of activePlanIds) {
+  assert.equal(activePlanIds.filter(id => id.startsWith('gym')).length, 10);
+  for (const id of activePlanIds.filter(id => id.startsWith('gym'))) {
     assert.ok(plans[id].ex.length >= 4);
     for (const exercise of plans[id].ex) {
       const info = exerciseLibrary[exercise[0]];

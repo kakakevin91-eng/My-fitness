@@ -49,4 +49,14 @@ export const gymPlans = {
   gymUpper: routine('上半身｜Upper Body', '上身 · Upper body', ['chestPress','latPulldown','shoulderPress','cableRow','tricepsPushdown'])
 };
 
-export const activePlanIds = Object.keys(gymPlans);
+export const activePlanIds = [...Object.keys(gymPlans), 'shoulder'];
+
+export const shoulderDetails = {
+  pec: ['Doorway Pec Stretch', '胸肌 · Chest'],
+  cat: ['Cat-Cow Stretch', '胸椎／背 · Thoracic spine / Back'],
+  yti: ['Prone Y-T-I', '後肩／上背 · Rear delts / Upper back'],
+  reverse: ['Reverse Pec Deck Fly', '後肩／上背 · Rear delts / Upper back'],
+  face: ['Cable Face Pull', '後肩／上背 · Rear delts / Upper back'],
+  circle: ['Dumbbell Shoulder Circles', '肩 · Shoulders'],
+  press: ['Seated Dumbbell Shoulder Press', '肩 · Shoulders']
+};

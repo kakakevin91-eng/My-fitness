@@ -48,7 +48,7 @@ frame.addEventListener('load', async () => {
       pain.value = '4'; pain.dispatchEvent(new Event('change', {bubbles: true}));
 
       const program = doc.getElementById('program');
-      assert(program.options.length === 10, 'program selector should offer 10 gym plans');
+      assert(program.options.length === 11 && Array.from(program.options).some(option => option.value === 'shoulder'), 'program selector should offer 10 gym plans and shoulder');
       const swap = doc.querySelector('[data-swap="legPress"]');
       program.value = 'gymChest'; program.dispatchEvent(new Event('change', {bubbles: true}));
       doc.querySelector('[data-set="chestPress-1"]').click();

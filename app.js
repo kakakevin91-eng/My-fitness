@@ -1,5 +1,5 @@
 'use strict';
-import {gymPlans, activePlanIds, exerciseLibrary} from './gym-plans.js';
+import {gymPlans, activePlanIds, exerciseLibrary, shoulderDetails} from './gym-plans.js';
 
 export const STORAGE_KEY = 'my-fitness-pwa-v1';
 export const TIMER_KEY = 'my-fitness-timer-v1';
@@ -363,11 +363,12 @@ function initApp() {
     plan.ex.forEach(exercise => {
       const [id, originalName, target, count, rest, originalUrl] = exercise;
       const info = exerciseLibrary[id];
+      const shoulderInfo = current === 'shoulder' ? shoulderDetails[id] : null;
       const choice = record.swaps?.[id] || '';
       const alternate = choice === 'alternate' ? exerciseLibrary[info?.[5]] : null;
       const name = choice === 'free' ? info?.[6] : alternate?.[0] || originalName;
-      const english = choice === 'free' ? info?.[7] : alternate?.[1] || info?.[1];
-      const muscle = alternate ? `${alternate[2]} · ${alternate[3]}` : info ? `${info[2]} · ${info[3]}` : '';
+      const english = choice === 'free' ? info?.[7] : alternate?.[1] || info?.[1] || shoulderInfo?.[0];
+      const muscle = alternate ? `${alternate[2]} · ${alternate[3]}` : info ? `${info[2]} · ${info[3]}` : shoulderInfo?.[1] || '';
       const url = choice === '' ? originalUrl : `https://www.youtube.com/results?search_query=${encodeURIComponent(english + ' exercise form')}`;
       total += count;
       html += `<div class="exercise"><div class="row"><div><h3>${esc(name)}</h3>${english ? `<span class="english">${esc(english)}</span>` : ''}<span class="muted">${esc(muscle)}${muscle ? ' · ' : ''}${esc(target)} · ${count} 組</span></div><a class="small" target="_blank" rel="noopener noreferrer" href="${url}">示範 ↗</a></div>${info ? `<label class="swap-label">器材被佔用／唔識做？<select class="field swap-select" data-swap="${esc(id)}" aria-label="替換 ${esc(originalName)}"><option value="" ${!choice ? 'selected' : ''}>原動作 · ${esc(originalName)}</option><option value="alternate" ${choice === 'alternate' ? 'selected' : ''}>同部位器械 · ${esc(exerciseLibrary[info[5]][0])}</option><option value="free" ${choice === 'free' ? 'selected' : ''}>其他器材 · ${esc(info[6])}</option></select></label>` : ''}<div class="sets">`;
@@ -409,7 +410,7 @@ function initApp() {
       container.classList.add('hidden');
       return;
     }
-    let html = '<div style="padding:10px;background:#f5f8f4;border-radius:12px">';
+    let html = '<div style="padding:10px;background:#20211d;border:1px solid #3c3d36">';
     for (let index = 1; index <= exercise[3]; index += 1) {
       const key = `${id}-${index}`;
       const set = record.sets?.[key] || {};
