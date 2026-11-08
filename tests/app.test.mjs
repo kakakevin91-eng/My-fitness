@@ -10,6 +10,7 @@ import {
   restoreTimerState,
   summarizeLogs
 } from '../app.js';
+import {activePlanIds, exerciseLibrary} from '../gym-plans.js';
 
 test('保留原本圓肩計劃及總組數', () => {
   assert.deepEqual(plans.shoulder.ex.map(item => item[1]), [
@@ -27,6 +28,22 @@ test('提供 20 個各自不同的入門計劃', () => {
     assert.ok(plan.ex.length >= 5);
     assert.equal(new Set(plan.ex.map(item => item[0])).size, plan.ex.length);
   }
+});
+
+test('日常選單有十套健身室計劃及中英文部位與替代動作', () => {
+  assert.equal(activePlanIds.length, 10);
+  for (const id of activePlanIds) {
+    assert.ok(plans[id].ex.length >= 4);
+    for (const exercise of plans[id].ex) {
+      const info = exerciseLibrary[exercise[0]];
+      assert.ok(info?.[1] && info?.[2] && info?.[3] && exerciseLibrary[info[5]] && info[6] && info[7]);
+    }
+  }
+  const backup = {version: 1, logs: {'2026-11-09': {gymChest: {sets: {'chestPress-1': {done: true, weight: '10', reps: '8'}}, swaps: {chestPress: 'alternate'}, notes: '', pain: ''}}}};
+  const clean = normalizeBackup(backup);
+  assert.equal(clean.logs['2026-11-09'].gymChest.swaps.chestPress, 'alternate');
+  assert.equal(clean.logs['2026-11-09'].gymChest.sets['chestPress-1'].weight, '10');
+  assert.throws(() => normalizeBackup({...backup, logs: {'2026-11-09': {gymChest: {...backup.logs['2026-11-09'].gymChest, swaps: {chestPress: 'script'}}}}}), /替代/);
 });
 
 test('使用本地日曆日期而非 UTC 日期', () => {

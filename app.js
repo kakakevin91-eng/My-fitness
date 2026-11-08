@@ -1,4 +1,5 @@
 'use strict';
+import {gymPlans, activePlanIds, exerciseLibrary} from './gym-plans.js';
 
 export const STORAGE_KEY = 'my-fitness-pwa-v1';
 export const TIMER_KEY = 'my-fitness-timer-v1';
@@ -48,6 +49,7 @@ const beginnerExercises = {
 const beginnerPlan = (name, keys) => ({name, ex: keys.map(key => [...beginnerExercises[key]])});
 
 export const plans = {
+  ...gymPlans,
   shoulder: {
     name: '原本圓肩練肩 Program',
     ex: [
@@ -166,7 +168,15 @@ export function normalizeBackup(value) {
         };
       }
 
-      cleanDay[programId] = {sets: cleanSets, notes, pain: pain === '' ? '' : String(Number(pain))};
+      const rawSwaps = rawEntry.swaps ?? {};
+      if (!isPlainObject(rawSwaps)) throw new Error('替代動作格式不正確');
+      const swaps = {};
+      for (const [slotId, choice] of Object.entries(rawSwaps)) {
+        const original = plan.ex.find(item => item[0] === slotId);
+        if (!original || !exerciseLibrary[slotId] || !['alternate', 'free'].includes(choice)) throw new Error('不支援的替代動作');
+        swaps[slotId] = choice;
+      }
+      cleanDay[programId] = {sets: cleanSets, swaps, notes, pain: pain === '' ? '' : String(Number(pain))};
     }
     clean.logs[date] = cleanDay;
   }
@@ -209,7 +219,7 @@ function initApp() {
     loadWarning = '現有本機資料格式異常，未有覆蓋原檔；請從備份匯入。';
   }
 
-  let current = 'shoulder';
+  let current = activePlanIds[0];
   let selected = today();
   let shownMonth = new Date().getMonth();
   let shownYear = new Date().getFullYear();
@@ -221,7 +231,7 @@ function initApp() {
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 
-  $('program').innerHTML = Object.entries(plans).map(([id, plan]) => `<option value="${esc(id)}">${esc(plan.name)}</option>`).join('');
+  $('program').innerHTML = activePlanIds.map(id => `<option value="${id}">${esc(plans[id].name)}</option>`).join('');
 
   function toast(message) {
     clearTimeout(toastTimer);
@@ -249,7 +259,7 @@ function initApp() {
 
   function entry() {
     const selectedDay = day();
-    selectedDay[current] ||= {sets: {}, notes: '', pain: ''};
+    selectedDay[current] ||= {sets: {}, swaps: {}, notes: '', pain: ''};
     return selectedDay[current];
   }
 
@@ -339,6 +349,8 @@ function initApp() {
   function renderTrain() {
     const plan = plans[current];
     const record = entry();
+    const legacy = !activePlanIds.includes(current);
+    if (legacy && !$('program').querySelector(`[value="${current}"]`)) $('program').insertAdjacentHTML('beforeend', `<option value="${current}">${esc(plan.name)} · 舊紀錄</option>`);
     $('program').value = current;
     $('logDate').value = selected;
     $('trainDate').textContent = selected;
@@ -349,9 +361,16 @@ function initApp() {
     let html = '';
 
     plan.ex.forEach(exercise => {
-      const [id, name, target, count, rest, url] = exercise;
+      const [id, originalName, target, count, rest, originalUrl] = exercise;
+      const info = exerciseLibrary[id];
+      const choice = record.swaps?.[id] || '';
+      const alternate = choice === 'alternate' ? exerciseLibrary[info?.[5]] : null;
+      const name = choice === 'free' ? info?.[6] : alternate?.[0] || originalName;
+      const english = choice === 'free' ? info?.[7] : alternate?.[1] || info?.[1];
+      const muscle = alternate ? `${alternate[2]} · ${alternate[3]}` : info ? `${info[2]} · ${info[3]}` : '';
+      const url = choice === '' ? originalUrl : `https://www.youtube.com/results?search_query=${encodeURIComponent(english + ' exercise form')}`;
       total += count;
-      html += `<div class="exercise"><div class="row"><div><h3>${esc(name)}</h3><span class="muted">${esc(target)} · ${count} 組</span></div><a class="small" target="_blank" rel="noopener noreferrer" href="${url}">睇示範 ↗</a></div><div class="sets">`;
+      html += `<div class="exercise"><div class="row"><div><h3>${esc(name)}</h3>${english ? `<span class="english">${esc(english)}</span>` : ''}<span class="muted">${esc(muscle)}${muscle ? ' · ' : ''}${esc(target)} · ${count} 組</span></div><a class="small" target="_blank" rel="noopener noreferrer" href="${url}">示範 ↗</a></div>${info ? `<label class="swap-label">器材被佔用／唔識做？<select class="field swap-select" data-swap="${esc(id)}" aria-label="替換 ${esc(originalName)}"><option value="" ${!choice ? 'selected' : ''}>原動作 · ${esc(originalName)}</option><option value="alternate" ${choice === 'alternate' ? 'selected' : ''}>同部位器械 · ${esc(exerciseLibrary[info[5]][0])}</option><option value="free" ${choice === 'free' ? 'selected' : ''}>其他器材 · ${esc(info[6])}</option></select></label>` : ''}<div class="sets">`;
       for (let index = 1; index <= count; index += 1) {
         const key = `${id}-${index}`;
         const done = Boolean(record.sets?.[key]?.done);
@@ -379,6 +398,7 @@ function initApp() {
       };
     });
     $('exerciseList').querySelectorAll('[data-detail]').forEach(button => {button.onclick = () => showDetail(button.dataset.detail);});
+    $('exerciseList').querySelectorAll('[data-swap]').forEach(select => {select.onchange = () => {entry().swaps ||= {}; if (select.value) entry().swaps[select.dataset.swap] = select.value; else delete entry().swaps[select.dataset.swap]; save(); renderTrain();};});
   }
 
   function showDetail(id) {
@@ -453,7 +473,10 @@ function initApp() {
       html += `<div class="history"><strong>${esc(plans[programId].name)}</strong><div class="muted small">完成 ${completed.length} 組${programRecord.pain !== '' ? ` · 肩頸痛 ${esc(programRecord.pain)}/10` : ''}</div>`;
       for (const [key, set] of completed) {
         const exercise = plans[programId].ex.find(item => key.startsWith(`${item[0]}-`));
-        html += `<div class="small" style="padding:3px 0">✓ ${esc(exercise?.[1] || key)} 第${esc(key.split('-').at(-1))}組${set.weight ? ` · ${esc(set.weight)} kg` : ''}${set.reps ? ` × ${esc(set.reps)}次` : ''}</div>`;
+        const choice = programRecord.swaps?.[exercise?.[0]];
+        const info = exerciseLibrary[exercise?.[0]];
+        const shownName = choice === 'free' ? info?.[6] : choice === 'alternate' ? exerciseLibrary[info?.[5]]?.[0] : exercise?.[1];
+        html += `<div class="small" style="padding:3px 0">✓ ${esc(shownName || key)} 第${esc(key.split('-').at(-1))}組${set.weight ? ` · ${esc(set.weight)} kg` : ''}${set.reps ? ` × ${esc(set.reps)}次` : ''}</div>`;
       }
       if (programRecord.notes) html += `<div class="small muted">備註：${esc(programRecord.notes)}</div>`;
       html += '</div>';
@@ -475,7 +498,7 @@ function initApp() {
   }
 
   for (let score = 0; score <= 10; score += 1) $('pain').insertAdjacentHTML('beforeend', `<option value="${score}">${score}/10</option>`);
-  $('program').onchange = event => {current = event.target.value; renderTrain();};
+    $('program').onchange = event => {current = event.target.value; renderTrain();};
   $('logDate').onchange = event => {
     if (!isValidDateKey(event.target.value)) {event.target.value = selected; return;}
     selected = event.target.value;
@@ -491,7 +514,7 @@ function initApp() {
   document.querySelectorAll('[data-tab]').forEach(button => {button.onclick = () => tab(button.dataset.tab);});
   $('prevMonth').onclick = () => moveMonth(-1);
   $('nextMonth').onclick = () => moveMonth(1);
-  $('editSelected').onclick = () => {current = Object.keys(data.logs[selected] || {}).find(key => plans[key]) || 'shoulder'; renderTrain(); tab('train');};
+  $('editSelected').onclick = () => {current = Object.keys(data.logs[selected] || {}).find(key => plans[key]) || activePlanIds[0]; renderTrain(); tab('train');};
   $('export').onclick = () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
