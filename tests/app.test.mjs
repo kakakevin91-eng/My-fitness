@@ -14,13 +14,19 @@ import {activePlanIds, exerciseLibrary, shoulderDetails} from '../gym-plans.js';
 
 test('保留原本圓肩計劃及總組數', () => {
   assert.ok(activePlanIds.includes('shoulder'));
-  assert.equal(activePlanIds.length, 11);
+  assert.equal(activePlanIds.length, 12);
   assert.deepEqual(plans.shoulder.ex.map(item => item[1]), [
     '胸肌伸展', '貓式伸展', '俯臥 Y–T–I', '反向蝴蝶機飛鳥',
     'Cable Face Pull', '啞鈴回環', '坐姿啞鈴推肩'
   ]);
   assert.equal(plans.shoulder.ex.reduce((sum, item) => sum + item[3], 0), 18);
   for (const exercise of plans.shoulder.ex) assert.ok(shoulderDetails[exercise[0]]?.[0] && shoulderDetails[exercise[0]]?.[1]);
+});
+
+test('45 分鐘帶氧可使用原有本機紀錄與備份格式', () => {
+  assert.equal(plans.cardio45.ex[0][2].startsWith('45 分鐘'), true);
+  const clean = normalizeBackup({version: 1, logs: {'2026-11-09': {cardio45: {sets: {'cardio-1': {done: true}}, notes: '', pain: ''}}}});
+  assert.equal(clean.logs['2026-11-09'].cardio45.sets['cardio-1'].done, true);
 });
 
 test('提供 20 個各自不同的入門計劃', () => {

@@ -22,11 +22,12 @@
     <header><div><div class="muted">PERSONAL FITNESS JOURNAL</div><h1>練習簿 <span class="brand-star" aria-hidden="true">✦</span></h1></div><span class="pill" id="todayLabel"></span></header>
     <section id="trainView">
       <div class="card warning"><strong>肩頸提示</strong><p class="small">你最近轉頭時仍有約 5/10 痛楚。完整圓肩訓練已保留，但暫時避免會誘發頸痛嘅負重動作；建議先由醫生或註冊物理治療師評估。任何動作令痛楚增加就停止。</p></div>
+      <div class="card suggestion"><div class="row"><h2>今日建議 <small>TODAY'S PICK</small></h2><span class="pill">本機計算</span></div><strong id="suggestionName"></strong><p id="suggestionReason" class="muted small"></p><button class="primary" id="useSuggestion">選擇呢套</button></div>
       <div class="card">
         <div class="row"><h2>今日訓練 <small>WORKOUT</small></h2><span id="trainDate" class="muted"></span></div>
         <label class="small muted" for="program">選擇訓練計劃</label>
         <select class="field" id="program"><option value="gymFullA">全身 A｜Full Body A</option></select>
-        <p class="muted small">揀部位訓練；每個動作可以即場換同部位替代項目。</p>
+        <p class="muted small">可自由選擇；器械動作可以即場換同部位替代項目。</p>
         <div class="row" style="margin:14px 0 8px"><strong id="progressLabel">0 / 0 組</strong><span class="muted small" id="sessionLabel">自動儲存</span></div>
         <div class="progress" aria-label="完成進度"><div id="progressBar" style="width:0"></div></div>
         <div id="exerciseList"><p>正在載入訓練計劃…</p></div>

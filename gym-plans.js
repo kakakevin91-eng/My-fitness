@@ -49,7 +49,7 @@ export const gymPlans = {
   gymUpper: routine('上半身｜Upper Body', '上身 · Upper body', ['chestPress','latPulldown','shoulderPress','cableRow','tricepsPushdown'])
 };
 
-export const activePlanIds = [...Object.keys(gymPlans), 'shoulder'];
+export const activePlanIds = [...Object.keys(gymPlans), 'shoulder', 'cardio45'];
 
 export const shoulderDetails = {
   pec: ['Doorway Pec Stretch', '胸肌 · Chest'],

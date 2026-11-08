@@ -1,5 +1,6 @@
 'use strict';
 import {gymPlans, activePlanIds, exerciseLibrary, shoulderDetails} from './gym-plans.js';
+import {suggestProgram} from './recommendation.js';
 
 export const STORAGE_KEY = 'my-fitness-pwa-v1';
 export const TIMER_KEY = 'my-fitness-timer-v1';
@@ -50,6 +51,11 @@ const beginnerPlan = (name, keys) => ({name, ex: keys.map(key => [...beginnerExe
 
 export const plans = {
   ...gymPlans,
+  cardio45: {
+    name: '帶氧 45 分鐘｜Cardio 45 min',
+    focus: '心肺 · Cardio',
+    ex: [['cardio', '帶氧運動', '45 分鐘 · 跑步機／單車／橢圓機', 1, 0, 'https://www.who.int/europe/news-room/fact-sheets/item/physical-activity']]
+  },
   shoulder: {
     name: '原本圓肩練肩 Program',
     ex: [
@@ -356,6 +362,11 @@ function initApp() {
     $('trainDate').textContent = selected;
     $('pain').value = record.pain ?? '';
     $('notes').value = record.notes ?? '';
+    const suggestion = suggestProgram(data.logs, selected);
+    $('suggestionName').textContent = plans[suggestion.id].name;
+    $('suggestionReason').textContent = suggestion.reason;
+    $('useSuggestion').disabled = current === suggestion.id;
+    $('useSuggestion').dataset.program = suggestion.id;
     let completed = 0;
     let total = 0;
     let html = '';
@@ -364,11 +375,12 @@ function initApp() {
       const [id, originalName, target, count, rest, originalUrl] = exercise;
       const info = exerciseLibrary[id];
       const shoulderInfo = current === 'shoulder' ? shoulderDetails[id] : null;
+      const cardio = current === 'cardio45';
       const choice = record.swaps?.[id] || '';
       const alternate = choice === 'alternate' ? exerciseLibrary[info?.[5]] : null;
       const name = choice === 'free' ? info?.[6] : alternate?.[0] || originalName;
-      const english = choice === 'free' ? info?.[7] : alternate?.[1] || info?.[1] || shoulderInfo?.[0];
-      const muscle = alternate ? `${alternate[2]} · ${alternate[3]}` : info ? `${info[2]} · ${info[3]}` : shoulderInfo?.[1] || '';
+      const english = choice === 'free' ? info?.[7] : alternate?.[1] || info?.[1] || shoulderInfo?.[0] || (cardio ? 'Cardio' : '');
+      const muscle = alternate ? `${alternate[2]} · ${alternate[3]}` : info ? `${info[2]} · ${info[3]}` : shoulderInfo?.[1] || (cardio ? '心肺 · Cardio' : '');
       const url = choice === '' ? originalUrl : `https://www.youtube.com/results?search_query=${encodeURIComponent(english + ' exercise form')}`;
       total += count;
       html += `<div class="exercise"><div class="row"><div><h3>${esc(name)}</h3>${english ? `<span class="english">${esc(english)}</span>` : ''}<span class="muted">${esc(muscle)}${muscle ? ' · ' : ''}${esc(target)} · ${count} 組</span></div><a class="small" target="_blank" rel="noopener noreferrer" href="${url}">示範 ↗</a></div>${info ? `<label class="swap-label">器材被佔用／唔識做？<select class="field swap-select" data-swap="${esc(id)}" aria-label="替換 ${esc(originalName)}"><option value="" ${!choice ? 'selected' : ''}>原動作 · ${esc(originalName)}</option><option value="alternate" ${choice === 'alternate' ? 'selected' : ''}>同部位器械 · ${esc(exerciseLibrary[info[5]][0])}</option><option value="free" ${choice === 'free' ? 'selected' : ''}>其他器材 · ${esc(info[6])}</option></select></label>` : ''}<div class="sets">`;
@@ -378,7 +390,7 @@ function initApp() {
         if (done) completed += 1;
         html += `<button class="set ${done ? 'done' : ''}" data-set="${esc(key)}" data-rest="${rest}" aria-label="${esc(name)} 第${index}組">${done ? '✓' : index}</button>`;
       }
-      html += `</div><div class="row small"><span class="muted">重量／次數可按組記錄</span><button class="outline" data-detail="${esc(id)}">編輯組數資料</button></div><div id="detail-${id}" class="hidden"></div></div>`;
+      html += `</div>${cardio ? '<p class="muted small">完成 45 分鐘後，按上面嘅按鈕記錄。</p>' : `<div class="row small"><span class="muted">重量／次數可按組記錄</span><button class="outline" data-detail="${esc(id)}">編輯組數資料</button></div><div id="detail-${id}" class="hidden"></div>`}</div>`;
     });
 
     $('exerciseList').innerHTML = html;
@@ -500,6 +512,7 @@ function initApp() {
 
   for (let score = 0; score <= 10; score += 1) $('pain').insertAdjacentHTML('beforeend', `<option value="${score}">${score}/10</option>`);
     $('program').onchange = event => {current = event.target.value; renderTrain();};
+  $('useSuggestion').onclick = () => {current = $('useSuggestion').dataset.program; renderTrain();};
   $('logDate').onchange = event => {
     if (!isValidDateKey(event.target.value)) {event.target.value = selected; return;}
     selected = event.target.value;
