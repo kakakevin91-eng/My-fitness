@@ -5,6 +5,48 @@ export const TIMER_KEY = 'my-fitness-timer-v1';
 export const MAX_IMPORT_BYTES = 2 * 1024 * 1024;
 export const DATA_VERSION = 1;
 
+const beginnerExercises = {
+  chairSquat: ['chair-squat', '椅子深蹲', '8–12 次', 3, 60, 'https://www.youtube.com/results?search_query=chair+squat+beginner+proper+form'],
+  sitToStand: ['sit-to-stand', '坐立練習', '8–12 次', 3, 60, 'https://www.youtube.com/results?search_query=sit+to+stand+exercise+beginner'],
+  gobletSquat: ['goblet-squat', '高腳杯深蹲', '8–12 次', 3, 75, 'https://www.youtube.com/results?search_query=goblet+squat+beginner+proper+form'],
+  gluteBridge: ['glute-bridge', '臀橋', '10–15 次', 3, 60, 'https://www.youtube.com/results?search_query=glute+bridge+beginner+proper+form'],
+  hipHinge: ['hip-hinge', '徒手髖鉸鏈', '8–12 次', 3, 60, 'https://www.youtube.com/results?search_query=bodyweight+hip+hinge+beginner'],
+  dumbbellRdl: ['dumbbell-rdl', '啞鈴羅馬尼亞硬拉', '8–12 次', 3, 75, 'https://www.youtube.com/results?search_query=dumbbell+romanian+deadlift+beginner+form'],
+  assistedLunge: ['assisted-lunge', '扶物弓步', '每邊 6–10 次', 3, 60, 'https://www.youtube.com/results?search_query=assisted+lunge+beginner+proper+form'],
+  stepUp: ['step-up', '低台階踏步', '每邊 8–10 次', 3, 60, 'https://www.youtube.com/results?search_query=low+step+up+beginner+proper+form'],
+  calfRaise: ['calf-raise', '扶牆提踭', '12–15 次', 2, 45, 'https://www.youtube.com/results?search_query=standing+calf+raise+beginner+proper+form'],
+  sideLegRaise: ['side-leg-raise', '站立側抬腿', '每邊 10–12 次', 3, 45, 'https://www.youtube.com/results?search_query=standing+side+leg+raise+beginner'],
+  clam: ['clam', '蚌式開合', '每邊 10–15 次', 3, 45, 'https://www.youtube.com/results?search_query=clamshell+exercise+beginner+proper+form'],
+  wallPushup: ['wall-pushup', '牆身掌上壓', '8–15 次', 3, 60, 'https://www.youtube.com/results?search_query=wall+push+up+beginner+proper+form'],
+  inclinePushup: ['incline-pushup', '斜身掌上壓', '6–12 次', 3, 60, 'https://www.youtube.com/results?search_query=incline+push+up+beginner+proper+form'],
+  floorPress: ['floor-press', '啞鈴地板臥推', '8–12 次', 3, 75, 'https://www.youtube.com/results?search_query=dumbbell+floor+press+beginner+proper+form'],
+  bandChestPress: ['band-chest-press', '彈力帶胸推', '10–15 次', 3, 60, 'https://www.youtube.com/results?search_query=resistance+band+chest+press+beginner'],
+  bandRow: ['band-row', '彈力帶坐姿划船', '10–15 次', 3, 60, 'https://www.youtube.com/results?search_query=seated+resistance+band+row+proper+form'],
+  dumbbellRow: ['dumbbell-row', '單臂啞鈴划船', '每邊 8–12 次', 3, 75, 'https://www.youtube.com/results?search_query=one+arm+dumbbell+row+beginner+proper+form'],
+  bandPullApart: ['band-pull-apart', '彈力帶水平拉開', '10–15 次', 2, 45, 'https://www.youtube.com/results?search_query=band+pull+apart+proper+form'],
+  suitcaseCarry: ['suitcase-carry', '單手提重物步行', '每邊 20–30 秒', 2, 60, 'https://www.youtube.com/results?search_query=suitcase+carry+beginner+proper+form'],
+  legPress: ['leg-press', '坐姿腿推機', '10–15 次', 3, 75, 'https://www.youtube.com/results?search_query=leg+press+machine+beginner+proper+form'],
+  legCurl: ['leg-curl', '坐姿腿彎舉', '10–15 次', 3, 60, 'https://www.youtube.com/results?search_query=seated+leg+curl+machine+proper+form'],
+  legExtension: ['leg-extension', '坐姿腿伸展', '10–15 次', 3, 60, 'https://www.youtube.com/results?search_query=leg+extension+machine+proper+form'],
+  machineChestPress: ['machine-chest-press', '器械胸推', '8–12 次', 3, 75, 'https://www.youtube.com/results?search_query=chest+press+machine+beginner+proper+form'],
+  cableRow: ['cable-row', '坐姿 Cable 划船', '8–12 次', 3, 75, 'https://www.youtube.com/results?search_query=seated+cable+row+beginner+proper+form'],
+  latPulldown: ['lat-pulldown', '高位下拉', '8–12 次', 3, 75, 'https://www.youtube.com/results?search_query=lat+pulldown+beginner+proper+form'],
+  birdDog: ['bird-dog', 'Bird Dog', '每邊 6–10 次', 3, 45, 'https://www.youtube.com/results?search_query=bird+dog+exercise+beginner+proper+form'],
+  deadBug: ['dead-bug', 'Dead Bug', '每邊 6–10 次', 3, 45, 'https://www.youtube.com/results?search_query=dead+bug+exercise+beginner+proper+form'],
+  elevatedPlank: ['elevated-plank', '高台平板支撐', '15–30 秒', 3, 45, 'https://www.youtube.com/results?search_query=elevated+plank+beginner+proper+form'],
+  heelTap: ['heel-tap', '仰臥腳踭輕觸', '每邊 8–12 次', 3, 45, 'https://www.youtube.com/results?search_query=supine+heel+tap+exercise+beginner'],
+  pallofPress: ['pallof-press', '彈力帶 Pallof Press', '每邊 8–12 次', 3, 45, 'https://www.youtube.com/results?search_query=resistance+band+pallof+press+beginner'],
+  marching: ['marching', '原地踏步', '45–60 秒', 3, 30, 'https://www.youtube.com/results?search_query=marching+in+place+low+impact+exercise'],
+  bandSideStep: ['band-side-step', '彈力帶側步', '每邊 8–12 步', 3, 45, 'https://www.youtube.com/results?search_query=resistance+band+lateral+walk+beginner'],
+  catCow: ['cat-cow', '貓牛式', '6–10 次', 2, 30, 'https://www.youtube.com/results?search_query=cat+cow+stretch+beginner'],
+  thoracicRotation: ['thoracic-rotation', '四足跪姿胸椎旋轉', '每邊 5–8 次', 2, 30, 'https://www.youtube.com/results?search_query=quadruped+thoracic+rotation+beginner'],
+  hipFlexorStretch: ['hip-flexor-stretch', '髖屈肌伸展', '每邊 20–30 秒', 2, 30, 'https://www.youtube.com/results?search_query=kneeling+hip+flexor+stretch+beginner'],
+  hamstringStretch: ['hamstring-stretch', '坐姿腿後肌伸展', '每邊 20–30 秒', 2, 30, 'https://www.youtube.com/results?search_query=seated+hamstring+stretch+beginner'],
+  easyWalk: ['easy-walk', '輕鬆步行', '10–20 分鐘', 1, 0, 'https://www.nhs.uk/live-well/exercise/walking-for-health/']
+};
+
+const beginnerPlan = (name, keys) => ({name, ex: keys.map(key => [...beginnerExercises[key]])});
+
 export const plans = {
   shoulder: {
     name: '原本圓肩練肩 Program',
@@ -18,6 +60,26 @@ export const plans = {
       ['press', '坐姿啞鈴推肩', '8–15 次', 4, 60, 'https://www.youtube.com/results?search_query=seated+dumbbell+shoulder+press+form']
     ]
   },
+  beginner01: beginnerPlan('入門 01｜全身基礎 A', ['chairSquat', 'gluteBridge', 'inclinePushup', 'bandRow', 'deadBug']),
+  beginner02: beginnerPlan('入門 02｜全身基礎 B', ['stepUp', 'hipHinge', 'wallPushup', 'dumbbellRow', 'birdDog']),
+  beginner03: beginnerPlan('入門 03｜居家無器材 A', ['sitToStand', 'wallPushup', 'gluteBridge', 'calfRaise', 'deadBug']),
+  beginner04: beginnerPlan('入門 04｜居家無器材 B', ['assistedLunge', 'inclinePushup', 'sideLegRaise', 'birdDog', 'elevatedPlank']),
+  beginner05: beginnerPlan('入門 05｜健身室器械 A', ['legPress', 'machineChestPress', 'latPulldown', 'legCurl', 'cableRow']),
+  beginner06: beginnerPlan('入門 06｜健身室器械 B', ['legExtension', 'legCurl', 'cableRow', 'machineChestPress', 'calfRaise']),
+  beginner07: beginnerPlan('入門 07｜啞鈴全身 A', ['gobletSquat', 'floorPress', 'dumbbellRow', 'dumbbellRdl', 'suitcaseCarry']),
+  beginner08: beginnerPlan('入門 08｜啞鈴全身 B', ['stepUp', 'floorPress', 'dumbbellRow', 'gluteBridge', 'deadBug']),
+  beginner09: beginnerPlan('入門 09｜彈力帶全身 A', ['chairSquat', 'bandRow', 'bandChestPress', 'bandPullApart', 'pallofPress']),
+  beginner10: beginnerPlan('入門 10｜彈力帶全身 B', ['hipHinge', 'bandRow', 'inclinePushup', 'bandSideStep', 'birdDog']),
+  beginner11: beginnerPlan('入門 11｜下肢基礎 A', ['chairSquat', 'gluteBridge', 'stepUp', 'calfRaise', 'deadBug']),
+  beginner12: beginnerPlan('入門 12｜下肢基礎 B', ['assistedLunge', 'hipHinge', 'sideLegRaise', 'clam', 'calfRaise']),
+  beginner13: beginnerPlan('入門 13｜上半身推拉 A', ['inclinePushup', 'bandRow', 'floorPress', 'dumbbellRow', 'bandPullApart']),
+  beginner14: beginnerPlan('入門 14｜上半身推拉 B', ['wallPushup', 'cableRow', 'machineChestPress', 'latPulldown', 'suitcaseCarry']),
+  beginner15: beginnerPlan('入門 15｜核心穩定 A', ['deadBug', 'birdDog', 'elevatedPlank', 'heelTap', 'gluteBridge']),
+  beginner16: beginnerPlan('入門 16｜核心穩定 B', ['pallofPress', 'marching', 'suitcaseCarry', 'deadBug', 'birdDog']),
+  beginner17: beginnerPlan('入門 17｜活動度與恢復', ['catCow', 'thoracicRotation', 'hipFlexorStretch', 'hamstringStretch', 'easyWalk']),
+  beginner18: beginnerPlan('入門 18｜低衝擊循環', ['marching', 'chairSquat', 'wallPushup', 'bandRow', 'calfRaise']),
+  beginner19: beginnerPlan('入門 19｜20 分鐘快速全身', ['sitToStand', 'inclinePushup', 'bandRow', 'gluteBridge', 'birdDog']),
+  beginner20: beginnerPlan('入門 20｜步行加力量', ['easyWalk', 'sitToStand', 'wallPushup', 'calfRaise', 'deadBug']),
   gentle: {
     name: '肩頸溫和活動',
     ex: [
@@ -158,6 +220,8 @@ function initApp() {
   let toastTimer = null;
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+
+  $('program').innerHTML = Object.entries(plans).map(([id, plan]) => `<option value="${esc(id)}">${esc(plan.name)}</option>`).join('');
 
   function toast(message) {
     clearTimeout(toastTimer);

@@ -19,6 +19,16 @@ test('保留原本圓肩計劃及總組數', () => {
   assert.equal(plans.shoulder.ex.reduce((sum, item) => sum + item[3], 0), 18);
 });
 
+test('提供 20 個各自不同的入門計劃', () => {
+  const beginnerPlans = Object.entries(plans).filter(([id]) => /^beginner\d{2}$/.test(id));
+  assert.equal(beginnerPlans.length, 20);
+  assert.equal(new Set(beginnerPlans.map(([, plan]) => plan.name)).size, 20);
+  for (const [, plan] of beginnerPlans) {
+    assert.ok(plan.ex.length >= 5);
+    assert.equal(new Set(plan.ex.map(item => item[0])).size, plan.ex.length);
+  }
+});
+
 test('使用本地日曆日期而非 UTC 日期', () => {
   assert.equal(formatLocalDate(new Date(2026, 0, 2, 23, 30)), '2026-01-02');
   assert.equal(isValidDateKey('2024-02-29'), true);

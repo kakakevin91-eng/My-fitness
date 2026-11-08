@@ -48,6 +48,9 @@ frame.addEventListener('load', async () => {
       pain.value = '4'; pain.dispatchEvent(new Event('change', {bubbles: true}));
 
       const program = doc.getElementById('program');
+      assert(Array.from(program.options).filter(option => /^beginner\d{2}$/.test(option.value)).length === 20, 'program selector should offer 20 beginner plans');
+      program.value = 'beginner01'; program.dispatchEvent(new Event('change', {bubbles: true}));
+      assert(doc.querySelectorAll('[data-set]').length > 0, 'selected beginner plan should render its sets');
       program.value = 'lower'; program.dispatchEvent(new Event('change', {bubbles: true}));
       doc.querySelector('[data-set="squat-1"]').click();
       await wait(50);

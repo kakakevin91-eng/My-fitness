@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'fitness-journal-v2';
+const CACHE = 'fitness-journal-v3';
 const APP_SHELL = ['./','./index.html','./style.css','./app.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install', event => {
