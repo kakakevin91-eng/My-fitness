@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "練習簿｜我的健身紀錄",
+  "short_name": "練習簿",
+  "description": "私人健身計劃、組數計時、月曆與本機訓練紀錄",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f6f7f2",
+  "theme_color": "#163b35",
+  "lang": "zh-HK",
+  "categories": ["fitness", "health", "lifestyle"],
+  "icons": [
+    {"src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

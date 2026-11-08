@@ -1,0 +1,79 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>練習簿 browser test</title>
+<pre id="result">RUNNING</pre>
+<script>
+'use strict';
+const result = document.getElementById('result');
+const allowed = new Set(['localhost', '127.0.0.1']);
+if (!allowed.has(location.hostname)) {
+  result.textContent = 'BLOCKED: browser test only runs on localhost';
+  throw new Error(result.textContent);
+}
+
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+const assert = (condition, message) => {if (!condition) throw new Error(message);};
+const report = message => {
+  result.textContent = message;
+  fetch(`/__browser_test__/${encodeURIComponent(message)}`).catch(() => {});
+};
+localStorage.removeItem('my-fitness-pwa-v1');
+localStorage.removeItem('my-fitness-timer-v1');
+
+const frame = document.createElement('iframe');
+frame.title = 'App under test';
+frame.src = `../index.html?browser-test=${Date.now()}`;
+document.body.append(frame);
+
+let stage = 0;
+frame.addEventListener('load', async () => {
+  try {
+    await wait(300);
+    const doc = frame.contentDocument;
+    if (stage === 0) {
+      assert(doc.querySelectorAll('[data-set]').length === 18, 'shoulder plan should render 18 sets');
+      doc.querySelector('[data-set="pec-1"]').click();
+      await wait(50);
+      assert(doc.getElementById('progressLabel').textContent === '1 / 18 組', 'set completion should update progress');
+
+      doc.querySelector('[data-detail="pec"]').click();
+      const weight = doc.querySelector('[data-weight="pec-1"]');
+      const reps = doc.querySelector('[data-reps="pec-1"]');
+      weight.value = '12.5'; weight.dispatchEvent(new Event('change', {bubbles: true}));
+      reps.value = '10'; reps.dispatchEvent(new Event('change', {bubbles: true}));
+      const notes = doc.getElementById('notes');
+      notes.value = '<img src=x onerror=alert(1)> 安全備註';
+      notes.dispatchEvent(new Event('input', {bubbles: true}));
+      const pain = doc.getElementById('pain');
+      pain.value = '4'; pain.dispatchEvent(new Event('change', {bubbles: true}));
+
+      const program = doc.getElementById('program');
+      program.value = 'lower'; program.dispatchEvent(new Event('change', {bubbles: true}));
+      doc.querySelector('[data-set="squat-1"]').click();
+      await wait(50);
+      program.value = 'shoulder'; program.dispatchEvent(new Event('change', {bubbles: true}));
+
+      doc.querySelector('[data-tab="calendar"]').click();
+      doc.querySelector(`[data-date="${doc.getElementById('logDate').value}"]`).click();
+      assert(doc.getElementById('dayDetail').textContent.includes('安全備註'), 'calendar should show saved note');
+      assert(!doc.getElementById('dayDetail').querySelector('img'), 'note must not create injected HTML');
+      const stored = JSON.parse(localStorage.getItem('my-fitness-pwa-v1'));
+      const today = Object.keys(stored.logs)[0];
+      assert(stored.logs[today].shoulder.sets['pec-1'].weight === '12.5', 'weight should persist');
+      assert(stored.logs[today].lower.sets['squat-1'].done === true, 'different programs must coexist');
+
+      stage = 1;
+      frame.src = `../index.html?browser-test-reload=${Date.now()}`;
+    } else {
+      assert(doc.getElementById('progressLabel').textContent === '1 / 18 組', 'completed set should survive reload');
+      assert(doc.getElementById('notes').value.includes('安全備註'), 'note should survive reload');
+      assert(doc.getElementById('timerNote').textContent === '休息中', 'running timer should survive reload');
+      report('PASS: sets, per-program records, notes, XSS escaping, local persistence, calendar and timer reload');
+      frame.remove();
+    }
+  } catch (error) {
+    report(`FAIL: ${error.message}`);
+    frame.remove();
+  }
+});
+</script>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="只在裝置本機儲存資料的私人健身紀錄 PWA">
+  <meta name="theme-color" content="#163b35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="練習簿">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="stylesheet" href="./style.css">
+  <title>練習簿｜我的健身紀錄</title>
+</head>
+<body>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <main>
+    <header><div><div class="muted">PERSONAL FITNESS JOURNAL</div><h1>練習簿 <span aria-hidden="true" style="font-size:24px">✦</span></h1></div><span class="pill" id="todayLabel"></span></header>
+    <section id="trainView">
+      <div class="card warning"><strong>肩頸提示</strong><p class="small">你最近轉頭時仍有約 5/10 痛楚。完整圓肩訓練已保留，但暫時避免會誘發頸痛嘅負重動作；建議先由醫生或註冊物理治療師評估。任何動作令痛楚增加就停止。</p></div>
+      <div class="card">
+        <div class="row"><h2>今日做咩？</h2><span id="trainDate" class="muted"></span></div>
+        <label class="small muted" for="program">選擇訓練計劃</label>
+        <select class="field" id="program"><option value="shoulder">原本圓肩練肩 Program</option><option value="gentle">肩頸溫和活動</option><option value="lower">輕量下肢</option><option value="walk">輕鬆步行</option></select>
+        <div class="row" style="margin:14px 0 8px"><strong id="progressLabel">0 / 0 組</strong><span class="muted small" id="sessionLabel">自動儲存</span></div>
+        <div class="progress" aria-label="完成進度"><div id="progressBar" style="width:0"></div></div>
+        <div id="exerciseList"><p>正在載入訓練計劃…</p></div>
+      </div>
+      <div class="card">
+        <div class="row"><h2>休息計時器</h2><select class="field" id="restSelect" aria-label="休息時間" style="width:115px"><option value="30">30 秒</option><option value="60" selected>60 秒</option><option value="90">90 秒</option><option value="120">120 秒</option></select></div>
+        <div id="timer" class="timer" aria-live="polite">01:00</div>
+        <div class="grid2"><button class="primary" id="timerToggle">開始</button><button class="secondary" id="timerReset">重設</button></div>
+        <p id="timerNote" class="muted small" style="text-align:center">完成一組會自動開始倒數</p>
+      </div>
+      <div class="card">
+        <h2>今日訓練備註</h2>
+        <div class="grid2"><label class="small">肩頸痛 (0–10)<select class="field" id="pain"><option value="">未填</option></select></label><label class="small">訓練日期<input class="field" type="date" id="logDate"></label></div>
+        <label class="small">備註<textarea class="field" id="notes" maxlength="5000" placeholder="例如：今日轉頭較舒服；負重只做輕量"></textarea></label>
+        <p class="muted small">改動會自動儲存。可選過去日期補記。</p>
+      </div>
+    </section>
+    <section id="calendarView" class="hidden">
+      <div class="card"><div class="row"><h2>訓練月曆</h2><div><button class="outline" id="prevMonth" aria-label="上個月">‹</button> <button class="outline" id="nextMonth" aria-label="下個月">›</button></div></div><h3 id="monthLabel" style="margin:8px 0 14px"></h3><div class="calendar" id="weekdays"></div><div class="calendar" id="calendar"></div><p class="muted small">● 有完成組數　🟠 只有備註／痛楚紀錄</p></div>
+      <div class="card"><div class="row"><h2 id="selectedDateLabel">當日紀錄</h2><button class="secondary" id="editSelected">補記／編輯</button></div><div id="dayDetail"></div></div>
+    </section>
+    <section id="settingsView" class="hidden">
+      <div class="card"><h2>資料與備份</h2><p class="muted">紀錄只儲存喺目前裝置嘅瀏覽器網站資料，唔會上傳到 GitHub 或其他伺服器。清除網站資料、移除 App 或更換裝置都有機會遺失，請定期匯出備份。</p><div class="grid2"><button class="primary" id="export">匯出 JSON 備份</button><button class="secondary" id="importBtn">匯入備份</button></div><input type="file" id="importFile" accept="application/json,.json" class="hidden"><p class="small muted">匯入會覆蓋目前紀錄，匯入前建議先匯出。最大檔案 2 MB。</p></div>
+      <div class="card"><h2>安裝到 iPhone</h2><p class="small">用 Safari 開啟 GitHub Pages 網址，再撳「分享」→「加入主畫面」。</p><p class="small">動作示範連結需要網絡。App 介面同已儲存紀錄可於完成首次載入後離線使用。</p></div>
+      <div class="card"><h2>資料摘要</h2><div id="stats"></div><button class="outline" id="clearData" style="color:#a34439;margin-top:12px">清除全部訓練紀錄</button></div>
+    </section>
+  </main>
+  <nav class="tabs" aria-label="主選單"><button class="active" data-tab="train">🏋️<br>訓練</button><button data-tab="calendar">🗓️<br>月曆</button><button data-tab="settings">⚙️<br>設定</button></nav>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

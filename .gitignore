@@ -1,0 +1,8 @@
+# Personal exports must never be committed.
+fitness-backup-*.json
+*.local.json
+
+# Local tooling.
+.DS_Store
+Thumbs.db
+node_modules/
